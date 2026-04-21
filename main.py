@@ -55,26 +55,35 @@ Ts = np.zeros(num, dtype=np.complex128)
 incident_angles = np.linspace(0, np.pi / 2, num)
 
 lambda_0 = 1 / (np.sqrt(epsilon_0 * mu_0) * f)
-print(lambda_0)
 
-epsrs = np.ones(12) * epsilon_0
-epsrs[1] = 2
-epsrs[-2] = 2
-epss =  epsrs * epsilon_0
-mus = np.ones(12) * mu_0
+epss = np.array([
+    1,
+    13.85,
+    5.98,
+    4.44,
+    0.06,
+    0.03,
+    0.01,
+    -0.003,
+    -2.12,
+    2.30,
+    0.08,
+    1,
+], dtype=np.complex128) * epsilon_0
+mus = np.ones(12, dtype=np.complex128) * mu_0
 ds = np.array(
     [
         0,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
-        lambda_0 / 9,
+        lambda_0 / 293.4,
+        lambda_0 / 6.0,
+        lambda_0 / 212.9,
+        lambda_0 / 24.2,
+        lambda_0 / 12.1,
+        lambda_0 / 9.8,
+        lambda_0 / 25.0,
+        lambda_0 / 3.6,
+        lambda_0 / 14.5,
+        lambda_0 / 2.4,
         0,
     ]
 )
@@ -85,7 +94,7 @@ for j, ang in enumerate(incident_angles):
     thetas[0] = incident_angles[j]
     for i in range(1, len(thetas)):
         thetas[i] = np.arcsin(ks[i - 1] / ks[i] * np.sin(thetas[i - 1]))
-    etas_TM = np.sqrt(mus / epss) * np.cos(thetas)
+    etas_TM = np.sqrt(mus / epss) * (1.0 / np.cos(thetas))
     kzs = ks * np.cos(thetas)
 
     abcd_mats = []
@@ -102,12 +111,13 @@ for j, ang in enumerate(incident_angles):
     Gammas[j] = Gamma
     Ts[j] = T
 
-fig, ax = plt.subplots()
-print(Gammas[0], db(Gammas[0]))
-print(Ts[0], db(Ts[0]))
+fig, axs = plt.subplots(2,1)
+# print(Gammas[0], db(Gammas[0]))
+# print(Ts[0], db(Ts[0]))
 # ax.plot(np.rad2deg(incident_angles), np.abs(Gammas))
-ax.plot(np.rad2deg(incident_angles), np.abs(Ts))
-
-greens_func = 1.0 + -(kyz**2) / (ks[0] ** 2)
-ax.plot(np.rad2deg(incident_angles), greens_func)
+axs[0].plot(np.rad2deg(incident_angles), np.real(Ts))
+axs[1].plot(np.rad2deg(incident_angles), np.imag(Ts))
+greens_func = -(kyz**2) / (ks[0] ** 2) + 0j
+axs[0].plot(np.rad2deg(incident_angles), np.real(greens_func))
+axs[1].plot(np.rad2deg(incident_angles), np.imag(greens_func))
 plt.show()
